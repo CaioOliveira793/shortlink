@@ -6,7 +6,7 @@ FROM docker.io/library/rust:${RUST_VERSION}-slim-bullseye as setup
 RUN echo "Dir::Cache \"\";\nDir::Cache::archives \"\";" | \
 	tee /etc/apt/apt.conf.d/00_disable-cache-directories && \
 	apt update --quiet && \
-	apt install --quiet -y git
+	apt install --quiet -y git curl
 
 RUN useradd shortlink --create-home --home /home/shortlink --user-group
 
@@ -33,4 +33,8 @@ COPY --chown=shortlink:shortlink crate/service-app crate/service-app
 
 RUN cargo build --profile dev --bin service-app
 
-CMD cargo run --profile dev --bin service-app
+HEALTHCHECK CMD curl --fail "http://localhost:$PORT/health" || exit 1
+
+STOPSIGNAL SIGTERM
+
+CMD target/debug/service-app

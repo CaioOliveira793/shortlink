@@ -17,7 +17,7 @@ tokio = { version = "1.27", features = ["full"] }
 axum = { version = "0.6.16" }
 
 # client
-surrealdb = { version = "1.0.0-beta.9+20230402" }
+surrealdb = { version = "1.0.0-beta" }
 
 # log
 tracing = { version = "0.1", default-features = false, features = ["std"] }
@@ -26,3 +26,6 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["s
 # data-type
 serde = { version = "1.0.160", default-features = false, features = ["std", "derive"] }
 time = { version = "0.3", default-features = false, features = ["std", "serde"] }
+
+# util
+once_cell = { version = "1.17" }
