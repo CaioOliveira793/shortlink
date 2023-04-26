@@ -1,0 +1,95 @@
+version: '3.7'
+
+services:
+  tikv_cluster:
+    container_name: tikv_cluster
+    image: tikv_cluster_slim
+    build:
+      context: .
+      target: tikv-slim
+      dockerfile: tikv.dockerfile
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 500M
+    healthcheck:
+      test: curl http://tikv_cluster:2379/pd/api/v1/health
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
+    volumes:
+      - tikv_cluster:/home/tikv/.tiup/data/tikv_cluster
+    ports:
+      - 2379:2379
+      - 9090:9090
+      - 3000:3000
+
+  surrealdb:
+    container_name: surrealdb
+    image: docker.io/surrealdb/surrealdb:1.0.0-beta.9-20230402
+    depends_on:
+      tikv_cluster:
+        restart: true
+        condition: service_healthy
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 250M
+    healthcheck:
+      test: curl http://surrealdb:2080/health
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
+    command: |
+      start tikv://tikv_cluster:2379
+      --user root
+      --pass ${SURREAL_ROOT_PASSWORD}
+      --bind 0.0.0.0:2080
+    ports:
+      - 2080:2080
+
+  service_app:
+    container_name: service_app
+    image: service_app_dev
+    build:
+      context: .
+      target: service-app
+      dockerfile: dev.dockerfile
+    depends_on:
+      surrealdb:
+        restart: true
+        condition: service_healthy
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 100M
+    healthcheck:
+      test: curl http://service_app:3333/health
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
+    environment:
+      PORT: 3333
+      TOKEN_KEY: ${TOKEN_KEY}
+      SURREAL_HOST: surrealdb
+      SURREAL_PORT: 2080
+      SURREAL_USER: root
+      SURREAL_PASS: ${SURREAL_ROOT_PASSWORD}
+    ports:
+      - 3333:3333
+
+volumes:
+  tikv_cluster: null
+
+networks:
+  default:
+    enable_ipv6: true

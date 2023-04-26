@@ -9,4 +9,4 @@ members = [
 edition = "2021"
 authors = ["Caio Oliveira <caio.vsoliveira23@gmail.com>"]
 license-file = "LICENSE"
-rust-version = "1.68"
+rust-version = "1.69"
