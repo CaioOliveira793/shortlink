@@ -1,3 +1,9 @@
+use surrealdb::{
+    engine::remote::ws::{Client, Ws},
+    opt::auth::Root,
+    Surreal,
+};
+
 pub mod env {
     use once_cell::sync::Lazy;
 
@@ -42,4 +48,23 @@ pub mod env {
     pub fn get() -> &'static EnvVar {
         &ENV_VAR
     }
+}
+
+pub async fn create_surrealdb_client() -> Surreal<Client> {
+    let surreal_addr = format!("{}:{}", env::get().surreal_host, env::get().surreal_port);
+
+    let db = Surreal::new::<Ws>(surreal_addr)
+        .await
+        .expect("failed to connect to surrealdb");
+    db.signin(Root {
+        username: &env::get().surreal_user,
+        password: &env::get().surreal_password,
+    })
+    .await
+    .expect("failed to signin to surrealdb");
+    db.use_ns("shortlink")
+        .use_db("shortlink_db")
+        .await
+        .expect("failed to use surreal database shortlink_db");
+    db
 }
