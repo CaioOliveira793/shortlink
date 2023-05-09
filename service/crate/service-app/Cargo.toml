@@ -8,6 +8,10 @@ rust-version.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "service_lib"
+path = "src/lib.rs"
+
 [[bin]]
 name = "service-app"
 path = "src/main.rs"
@@ -17,7 +21,7 @@ tokio = { version = "1.27", features = ["full"] }
 axum = { version = "0.6.16", default-features = false, features = ["http1", "http2", "tokio", "tracing", "json", "query", "matched-path"] }
 
 # client
-surrealdb = { version = "1.0.0-beta" }
+surrealdb = { version = "1.0.0-beta", features = ["kv-mem"] }
 
 # log
 tracing = { version = "0.1", default-features = false, features = ["std"] }
@@ -25,6 +29,7 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["s
 
 # data-type
 serde = { version = "1.0.160", default-features = false, features = ["std", "derive"] }
+url = { version = "2.3.1", features = ["serde"] }
 time = { version = "0.3", default-features = false, features = ["std", "serde", "formatting", "parsing"] }
 ulid = { version = "1.0.0" }
 sha2 = { version = "0.10.6" }
@@ -33,3 +38,10 @@ base62 = { package = "base-62", version = "0.1" }
 # util
 once_cell = { version = "1.17" }
 rand = "0.8.5"
+
+[dev-dependencies]
+dotenv = { version = "0.15.0" }
+serial_test = { version = "0.9.0" }
+
+reqwest = { version = "0.11.12", default-features = false, features = ["rustls-tls", "json", "gzip"] }
+

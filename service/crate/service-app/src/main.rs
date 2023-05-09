@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use config::env;
 
 mod config;
+mod entity;
 mod router;
 mod signal;
 mod util;

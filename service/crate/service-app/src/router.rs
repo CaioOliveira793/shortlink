@@ -4,7 +4,7 @@ use axum::{
 };
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::config;
+use crate::config::database;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -12,7 +12,7 @@ pub struct AppState {
 }
 
 pub async fn make_app_router() -> Router {
-    let db = config::create_surrealdb_client().await;
+    let db = database::create_surrealdb_client().await;
     Router::new()
         .route("/url", get(short_url_service::list_short_url))
         .route("/url", post(short_url_service::create_short_url))
@@ -35,55 +35,9 @@ pub mod short_url_service {
     use time::{format_description::well_known::Rfc2822, OffsetDateTime};
     use ulid::Ulid;
 
+    use crate::entity::ShortUrl;
+
     use super::AppState;
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct ShortUrl {
-        /// Short url slug and record ID
-        slug: String,
-        #[serde(with = "time::serde::iso8601")]
-        created: OffsetDateTime,
-        #[serde(with = "time::serde::iso8601")]
-        updated: OffsetDateTime,
-        long_url: String,
-        active: bool,
-        #[serde(with = "crate::util::serde::opt_iso8601")]
-        expires: Option<OffsetDateTime>,
-        creator_id: Ulid,
-    }
-
-    impl ShortUrl {
-        pub fn new(
-            slug: String,
-            long_url: String,
-            expires: Option<OffsetDateTime>,
-            creator: Ulid,
-        ) -> Self {
-            let created = OffsetDateTime::now_utc();
-            Self {
-                slug,
-                created,
-                updated: created,
-                long_url,
-                active: true,
-                expires,
-                creator_id: creator,
-            }
-        }
-
-        /// Verify if the ShortUrl is expired
-        pub fn expired(&self) -> bool {
-            if let Some(expires) = self.expires {
-                return expires < OffsetDateTime::now_utc();
-            }
-            return false;
-        }
-
-        /// Verify if the ShortUrl can be redirected
-        pub fn responsive(&self) -> bool {
-            return self.active && !self.expired();
-        }
-    }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     struct ShortUrlRecord {
@@ -165,6 +119,7 @@ pub mod short_url_service {
     ) -> Result<(StatusCode, Json<ShortUrl>), (StatusCode, Json<CreateShortUrlError>)> {
         let slug = if let Some(slug) = data.slug {
             if verify_short_url_exists(&slug, &state.db).await {
+                tracing::info!("user provided url slug already exists {slug}");
                 return Err((
                     StatusCode::UNPROCESSABLE_ENTITY,
                     Json(CreateShortUrlError::ShortUrlExist),
@@ -230,7 +185,10 @@ pub mod short_url_service {
     ) -> Result<impl IntoResponse, StatusCode> {
         let slug: String = "fake_slug".into();
         let records: Vec<ShortUrlRecord> = state.db.select("url").await.unwrap();
-        let entities = records.into_iter().map(|rec| rec.to_entity(slug.clone())).collect::<Vec<_>>();
+        let entities = records
+            .into_iter()
+            .map(|rec| rec.to_entity(slug.clone()))
+            .collect::<Vec<_>>();
         Ok((StatusCode::OK, Json(entities)))
     }
 }
