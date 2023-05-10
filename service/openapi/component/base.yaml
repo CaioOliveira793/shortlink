@@ -1,0 +1,143 @@
+schemas:
+  offset_pagination:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+      offset:
+        type: integer
+        format: int32
+        description: number of items skiped in the query
+      limit:
+        type: integer
+        format: int32
+        description: maximum count of items returned in the query
+      count:
+        type: integer
+        format: int32
+        description: number of items in the response
+      next:
+        type: integer
+        format: int32
+        nullable: true
+        description: offset the request should use to query the next items
+      prev:
+        type: integer
+        format: int32
+        nullable: true
+        description: offset the request should use to query the previous items
+    required:
+    - data
+    - offset
+    - limit
+    - count
+    - next
+    - prev
+
+  query_cursor:
+    type: string
+    description: unique resource poiner
+    nullable: true
+
+  query_order:
+    type: string
+    enum:
+    - asc
+    - desc
+    default: asc
+
+  query_page:
+    type: string
+    enum:
+    - next
+    - prev
+    default: next
+
+  query_limit:
+    type: integer
+    minimum: 1
+    maximum: 50
+    default: 20
+
+  cursor_pagination:
+    type: object
+    required:
+    - data
+    - cursor
+    - order
+    - page
+    - limit
+    - count
+    - next
+    - prev
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+      cursor:
+        $ref: '#/schemas/query_cursor'
+      order:
+        $ref: '#/schemas/query_order'
+      page:
+        $ref: '#/schemas/query_page'
+      limit:
+        type: integer
+        format: int32
+        description: maximum count of items returned in the query
+      count:
+        type: integer
+        format: int32
+        description: number of items in the response
+      next:
+        allOf:
+        - $ref: '#/schemas/query_cursor'
+        - description: |
+            cursor that should be used in a similar query for the next page
+      prev:
+        allOf:
+        - $ref: '#/schemas/query_cursor'
+        - description: |
+            cursor that should be used in a similar query for the previous page
+
+parameters:
+  cursor:
+    name: ptr
+    in: query
+    description: unique resource pointer as the query cursor
+    required: false
+    allowEmptyValue: false
+    schema:
+      $ref: '#/schemas/query_cursor'
+  order:
+    name: ord
+    in: query
+    description: order used in the list of resources
+    required: false
+    allowEmptyValue: false
+    schema:
+      $ref: '#/schemas/query_order'
+  page:
+    name: pg
+    in: query
+    description: which page relative to the cursor the query will fetch
+    required: false
+    allowEmptyValue: false
+    schema:
+      $ref: '#/schemas/query_page'
+  limit:
+    name: lmt
+    in: query
+    description: limit of resources to fetch
+    required: false
+    allowEmptyValue: false
+    schema:
+      $ref: '#/schemas/query_limit'
+
+responses:
+  empty_response:
+    description: empty response
+    content: {}  
+

@@ -41,12 +41,12 @@ POST /auth -> { user: User, token: string }
 ## url management
 
 type ShortUrlEntry = {
-	id: string,
+	slug: string,
 	created: timestamp,
 	updated: timestamp,
 	long_url: string,
 	expires: timestamp | null,
-	short_url: string | null,
+	short_url: string,
 	active: boolean,
 }
 

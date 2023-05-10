@@ -1,0 +1,114 @@
+schemas:
+  Slug:
+    type: string
+    description: url slug
+    pattern: '^[0-9A-Za-z_-]+$'
+
+  ShortUrl:
+    type: object
+    required:
+    - slug
+    - created
+    - updated
+    - long_url
+    - active
+    - expires
+    - creator_id
+    properties:
+      slug:
+        allOf:
+        - $ref: '#/schemas/Slug'
+        - type: string
+          description: short url slug and unique identifier of the record
+      created:
+        type: integer
+        format: int64
+      updated:
+        type: integer
+        format: int64
+      long_url:
+        type: string
+        format: uri
+      active:
+        type: boolean
+        default: true
+      expires:
+        type: integer
+        format: int64
+        nullable: true
+        default: null
+      creator_id:
+        type: string
+        format: ulid
+
+  CreateShortUrl:
+    type: object
+    required:
+    - long_url
+    - expires
+    - slug
+    properties:
+      long_url:
+        type: string
+        format: uri
+      expires:
+        type: integer
+        format: int64
+        nullable: true
+        default: null
+      slug:
+        allOf:
+        - $ref: '#/schemas/Slug'
+        - nullable: true
+          default: null
+
+  UpdateShortUrlActive:
+    type: object
+    required:
+    - active
+    properties:
+      active:
+        type: boolean
+        default: true
+
+  UpdateShortUrlExpires:
+    type: object
+    required:
+    - expires
+    properties:
+      expires:
+        type: integer
+        format: int64
+        nullable: true
+        default: null
+
+parameters:
+  short_url_slug:
+    name: slug
+    in: path
+    description: short url slug
+    required: true
+    schema:
+      $ref: '#/schemas/Slug'
+
+responses:
+  short_url:
+    description: A short url entry
+    content:
+      'application/json':
+        schema:
+          $ref: '#/schemas/ShortUrl'
+
+  short_url_list:
+    description: A short url entry list
+    content:
+      'application/json':
+        schema:
+          allOf:
+          - $ref: 'base.yaml#/schemas/cursor_pagination'
+          - properties:
+              data:
+                items:
+                  $ref: '#/schemas/ShortUrl'
+
+

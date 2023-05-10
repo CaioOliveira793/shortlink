@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Shortlink
+  description: Shortlink service API
+  contact:
+    name: Shortlink repository
+    url: https://github.com/CaioOliveira793/shortlink
+  license:
+    name: MIT License
+    url: https://github.com/CaioOliveira793/shortlink/blob/main/service/LICENSE
+  version: 1.0.0
+servers:
+- url: http://0.0.0.0:{port}
+  description: Development server
+  variables:
+    port:
+      default: '3333'
+tags:
+  - name: ShortUrl
+    description: short url management routes
+paths:
+  /url:
+    get:
+      summary: Get short url list
+      operationId: get_short_url_list
+      tags:
+      - ShortUrl
+      parameters:
+      - $ref: 'component/base.yaml#/parameters/cursor'
+      - $ref: 'component/base.yaml#/parameters/order'
+      - $ref: 'component/base.yaml#/parameters/page'
+      - $ref: 'component/base.yaml#/parameters/limit'
+      responses:
+        '200':
+          $ref: 'component/short_url.yaml#/responses/short_url_list'
+    post:
+      summary: Create short url
+      operationId: create_short_url
+      tags:
+      - ShortUrl
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: 'component/short_url.yaml#/schemas/CreateShortUrl'
+      responses:
+        '201':
+          $ref: 'component/short_url.yaml#/responses/short_url'
+  /url/{slug}:
+    get:
+      summary: Get short url
+      operationId: get_short_url
+      tags:
+      - ShortUrl
+      parameters:
+      - $ref: 'component/short_url.yaml#/parameters/short_url_slug'
+      responses:
+        '200':
+          $ref: 'component/short_url.yaml#/responses/short_url'
+    delete:
+      summary: Delete short url
+      operationId: delete_short_url
+      tags:
+      - ShortUrl
+      parameters:
+      - $ref: 'component/short_url.yaml#/parameters/short_url_slug'
+      responses:
+        '204':
+          $ref: 'component/base.yaml#/responses/empty_response'
+  /url/{slug}/active:
+    put:
+      summary: Set short url active state
+      operationId: put_short_url_active
+      tags:
+      - ShortUrl
+      parameters:
+      - $ref: 'component/short_url.yaml#/parameters/short_url_slug'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: 'component/short_url.yaml#/schemas/UpdateShortUrlActive'
+      responses:
+        '200':
+          $ref: 'component/short_url.yaml#/responses/short_url'
+  /url/{slug}/expires:
+    put:
+      summary: Set short url expiration
+      operationId: put_short_url_expires
+      tags:
+      - ShortUrl
+      parameters:
+      - $ref: 'component/short_url.yaml#/parameters/short_url_slug'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: 'component/short_url.yaml#/schemas/UpdateShortUrlExpires'
+      responses:
+        '200':
+          $ref: 'component/short_url.yaml#/responses/short_url'
+
