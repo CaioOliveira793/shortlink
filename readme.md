@@ -11,6 +11,10 @@ The development services are composed by:
 - In memory SurrealDB instance
 - Backend service
 
+## Documentation
+
+The service has a [Open API Specification](https://github.com/CaioOliveira793/shortlink/blob/main/service/openapi/main.yaml) describing all the endpoints. A rendered version can be found [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/CaioOliveira793/shortlink/main/service/openapi/main.yaml)
+
 ## URL Shortening strategies
 
 A URL shortener can be implemented in numerous ways, each of than can favor some aspect of the system (scalability, simplicity, cost, ...).

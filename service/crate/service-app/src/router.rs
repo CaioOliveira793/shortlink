@@ -3,6 +3,7 @@ use axum::{
     Router,
 };
 use surrealdb::{engine::remote::ws::Client, Surreal};
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 use crate::config::database;
 
@@ -18,6 +19,8 @@ pub async fn make_app_router() -> Router {
         .route("/url", post(short_url_service::create_short_url))
         .route("/health", get(|| async { "Ok" }))
         .route("/:slug", get(short_url_service::redirect_short_url))
+        .layer(TraceLayer::new_for_http())
+        .layer(CorsLayer::permissive())
         .with_state(AppState { db })
 }
 
