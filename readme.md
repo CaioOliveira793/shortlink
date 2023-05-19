@@ -23,7 +23,17 @@ For comparison purposes, this project aims to implement multiple strategies usin
 
 > At the moment, only the simplest short url generation strategy was implemented
 
-### Long URL hash with random salt
+### Long URL Random Number
 
-TODO: explain the long url hash plus random salt strategy
+TODO: explain the long url hash plus random numbers strategy
+
+### Consistent Hash
+
+### Distributed Counter
+
+Distributed increment counter aggregated in the long url hash
+
+### Long URL Unique Counter
+
+Counter associated with the long url, incremented on each short url creation
 
